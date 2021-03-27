@@ -1,0 +1,33 @@
+define CLOCKS 1u;
+
+main:
+setup the clock;
+allow interrupts;
+while (1);
+
+
+INT1: #Uout = Uin/4
+ban interrupts;
+stop 2nd phase;
+setup timer;
+allow interrupts;
+
+INT2: #Uout = Uin/10
+ban interrupts;
+stop 2nd phase;
+setup timer;
+allow interrupts;
+
+INT3: #Uout = Uin/4  - 2phases
+ban interrupts;
+setup timer;
+start 2nd phase;
+allow interrupts;
+
+INT4: #Uout = Uin/10 - 2phases
+ban interrupts;
+setup timer;
+start 2nd phase;
+allow interrupts;
+
+
