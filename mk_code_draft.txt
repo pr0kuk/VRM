@@ -10,24 +10,48 @@ INT1: #Uout = Uin/4
 ban interrupts;
 stop 2nd phase;
 setup timer;
+TCNT0 = 0;
+OCR0 = 192; 192 = C0
+TCCR0 = 01111001;
+TIMSK = 00000001;
+TIFR = 0;
 allow interrupts;
 
 INT2: #Uout = Uin/10
 ban interrupts;
 stop 2nd phase;
 setup timer;
+TCNT0 = 0;
+OCR0 = 230.4; 230 = D6;
+TCCR0 = 01111001;
+TIMSK = 00000001;
+TIFR = 0;
 allow interrupts;
 
 INT3: #Uout = Uin/4  - 2phases
 ban interrupts;
 setup timer;
+TCNT0 = 0;
+TCNT2 = 129; 129 = 81
+OCR0 = 224; 224 = D
+OCR2 = 224; 224 = D
+TCCR0 = 01111001;
+TCCR2 = 01111001;
+TIMSK = 00000001;
+TIFR = 0;
 start 2nd phase;
 allow interrupts;
 
 INT4: #Uout = Uin/10 - 2phases
 ban interrupts;
 setup timer;
+TCNT0 = 0;
+TCNT2 = 129; 129 = 81
+OCR0 = 243; 243 = E3
+OCR2 = 243; 243 = E3
+TCCR0 = 01111001;
+TCCR2 = 01111001;
+TIMSK = 00000001;
+TIFR = 0;
 start 2nd phase;
 allow interrupts;
-
-
