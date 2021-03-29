@@ -1,7 +1,4 @@
-define CLOCKS 1u;
-
 main:
-setup the clock;
 allow interrupts;
 while (1);
 
@@ -11,7 +8,7 @@ ban interrupts;
 stop 2nd phase;
 setup timer;
 TCNT0 = 0;
-OCR0 = 192; 192 = C0
+OCR0 = 192; 192 = 0xC0
 TCCR0 = 01111001;
 TIMSK = 00000001;
 TIFR = 0;
@@ -22,7 +19,7 @@ ban interrupts;
 stop 2nd phase;
 setup timer;
 TCNT0 = 0;
-OCR0 = 230.4; 230 = D6;
+OCR0 = 230.4; 230 = 0xD6;
 TCCR0 = 01111001;
 TIMSK = 00000001;
 TIFR = 0;
@@ -32,9 +29,9 @@ INT3: #Uout = Uin/4  - 2phases
 ban interrupts;
 setup timer;
 TCNT0 = 0;
-TCNT2 = 129; 129 = 81
-OCR0 = 224; 224 = D
-OCR2 = 224; 224 = D
+TCNT2 = 129; 129 = 0x81
+OCR0 = 224; 224 = 0xD
+OCR2 = 224; 224 = 0xD
 TCCR0 = 01111001;
 TCCR2 = 01111001;
 TIMSK = 00000001;
@@ -46,9 +43,9 @@ INT4: #Uout = Uin/10 - 2phases
 ban interrupts;
 setup timer;
 TCNT0 = 0;
-TCNT2 = 129; 129 = 81
-OCR0 = 243; 243 = E3
-OCR2 = 243; 243 = E3
+TCNT2 = 129; 129 = 0x81
+OCR0 = 243; 243 = 0xE3
+OCR2 = 243; 243 = 0xE3
 TCCR0 = 01111001;
 TCCR2 = 01111001;
 TIMSK = 00000001;
