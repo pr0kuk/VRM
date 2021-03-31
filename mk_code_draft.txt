@@ -1,3 +1,8 @@
+.EQU PORTC = $15
+.EQU DDRC  = $14
+.EQU PINC  = $13
+.EQU SREG  = $3f
+
 .EQU ADCSRA =$06
 .EQU OCR2   =$23
 .EQU TCNT2  =$24
@@ -11,6 +16,8 @@
 rjmp RESET
 
 main:
+  SBRC ADCSRA, 7
+  rjmp CODE4
   rjmp main; infinite loop
 
 INT0: ;Uout = Uin/4
@@ -18,23 +25,23 @@ INT0: ;Uout = Uin/4
   SBRC r28, 0
   rjmp 2phase4
   1phase4:
-    SER TCNT0, $00  ;TCNT0 = 0
-    SER TCNT2, $00  ;TCNT2 = 0
-    SER TCCR2, $00  ;TCCR2 = 0 timer0 counter
-    SER OCR0,  $C0  ;OCR0  = 192 192 = 0xC0 timer2 counter
-    SER TCCR0, $79  ;TCCR0 = 01111001
-    SER TIMSK, $01  ;TIMSK = 00000001
-    SER TIFR,  $00  ;TIFR  = 0
+    CLR TCNT0       ;TCNT0 = 0
+    CLR TCNT2       ;TCNT2 = 0
+    CLR TCCR2,      ;TCCR2 = 0 timer0 counter
+    LDI OCR0,  $C0  ;OCR0  = 192 192 = 0xC0 timer2 counter
+    LDI TCCR0, $79  ;TCCR0 = 01111001
+    LDI TIMSK, $01  ;TIMSK = 00000001
+    CLR TIFR        ;TIFR  = 0
     RETI
 
   2phase4:
-    SER TCNT0, $00  ;TCNT0 = 0
-    SER TCNT2, $00  ;TCNT2 = 0
-    SER TCCR2, $00  ;TCCR2 = 0 timer0 counter
-    SER OCR0,  $D6  ;OCR0  = 230.4 230 = 0xD6
-    SER TCCR0, $79  ;TCCR0 = 01111001
-    SER TIMSK, $01  ;TIMSK = 00000001
-    SER TIFR,  $00  ;TIFR  = 0
+    CLR TCNT0       ;TCNT0 = 0
+    CLR TCNT2       ;TCNT2 = 0
+    LDI TCCR2, $00  ;TCCR2 = 0 timer0 counter
+    LDI OCR0,  $D6  ;OCR0  = 230.4 230 = 0xD6
+    LDI TCCR0, $79  ;TCCR0 = 01111001
+    LDI TIMSK, $01  ;TIMSK = 00000001
+    CLR TIFR        ;TIFR  = 0
     RETI
 
 INT1: ;Uout = Uin/10
@@ -42,36 +49,37 @@ INT1: ;Uout = Uin/10
   SBRC r29, 0
   rjmp 2phase
   1phase10:
-    SER TCNT0, $00  ;TCNT0 = 0
-    SER TCNT2, $81  ;TCNT2 = 129 129 = 0x81
-    SER OCR0,  $D   ;OCR0  = 224 224 = 0xD
-    SER OCR2,  $D   ;OCR2  = 224 224 = 0xD
-    SER TCCR0, $79  ;TCCR0 = 01111001
-    SER TCCR2, $79  ;TCCR2 = 01111001
-    SER TIMSK, $01  ;TIMSK = 00000001
-    SER TIFR,  $00  ;TIFR  = 0
+    CLR TCNT0       ;TCNT0 = 0
+    LDI TCNT2, $81  ;TCNT2 = 129 129 = 0x81
+    LDI OCR0,  $D   ;OCR0  = 224 224 = 0xD
+    LDI OCR2,  $D   ;OCR2  = 224 224 = 0xD
+    LDI TCCR0, $79  ;TCCR0 = 01111001
+    LDI TCCR2, $79  ;TCCR2 = 01111001
+    LDI TIMSK, $01  ;TIMSK = 00000001
+    CLR TIFR        ;TIFR  = 0
     RETI
 
   2phase10:
-    SER TCNT0, $00  ;TCNT0 = 0
-    SER TCNT2, $81  ;TCNT2 = 129 129 = 0x81
-    SER OCR0,  $E3  ;OCR0  = 243 243 = 0xE3
-    SER OCR2,  $E3  ;OCR2  = 243 243 = 0xE3
-    SER TCCR0, $79  ;TCCR0 = 01111001
-    SER TCCR2, $79  ;TCCR2 = 01111001
-    SER TIMSK, $01  ;TIMSK = 00000001
-    SER TIFR,  $00  ;TIFR  = 0
+    CLR TCNT0       ;TCNT0 = 0
+    LDI TCNT2, $81  ;TCNT2 = 129 129 = 0x81
+    LDI OCR0,  $E3  ;OCR0  = 243 243 = 0xE3
+    LDI OCR2,  $E3  ;OCR2  = 243 243 = 0xE3
+    LDI TCCR0, $79  ;TCCR0 = 01111001
+    LDI TCCR2, $79  ;TCCR2 = 01111001
+    LDI TIMSK, $01  ;TIMSK = 00000001
+    CLR TIFR        ;TIFR  = 0
     RETI
 
 INT2: ;ADC ON
   EOR r31, r30; ADCBIT++
   SBRS r31, 0
-  SER ADCSRA, $EF
+  LDI ADCSRA, $EF
   SBRC r31, 0
-  SER ADCSRA, 0
+  CLR ADCSRA
   RETI
 
 CODE4:
+  inc r27
   mov r16, r18
   andi r16, $f0
   ori r16, 1
@@ -79,12 +87,20 @@ CODE4:
   sbi PORTC, 2
   cli PORTC, 2
   rcall del
+  CP r27, $04
+  BREQ SHIFT
   ret
 
 SHIFT:
-  SER 
+  LDI r16, $02
+  OUT PORTC, r18
+  SBI PORTC, 2
+  CLI PORTC, 2
+  ret
 
 RESET:
-  SER r30, $01
-  sei
+  LDI r30, $01
+  SER r16
+  OUT DDRC, r16
+  SEI
   rjmp main
