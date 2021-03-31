@@ -6,7 +6,7 @@
 .EQU TCCR0  =$33
 .EQU TIFR   =$38
 .EQU TIMSK  =$39
-.EQU OCR0   =$3C
+.EQU OCR0   =$3C  
 .CSEG
 rjmp RESET
 
@@ -70,6 +70,19 @@ INT2: ;ADC ON
   SBRC r31, 0
   SER ADCSRA, 0
   RETI
+
+CODE4:
+  mov r16, r18
+  andi r16, $f0
+  ori r16, 1
+  out PORTC, r16
+  sbi PORTC, 2
+  cli PORTC, 2
+  rcall del
+  ret
+
+SHIFT:
+  SER 
 
 RESET:
   SER r30, $01
