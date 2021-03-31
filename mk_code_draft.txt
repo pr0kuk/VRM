@@ -14,47 +14,47 @@ rjmp main; infinite loop
 
 INT0: ;Uout = Uin/4
 INT0BIT++;
-if (INT0BIT) { ;1 phase
-  TCNT0 = 0; 
-  TCNT2 = 0;
-  TCCR2 = 0; timer0 counter
-  OCR0 = 192; 192 = 0xC0 timer2 counter
-  TCCR0 = 01111001;
-  TIMSK = 00000001;
-  TIFR = 0;
+if (INT0BIT) {    ;1 phase
+  SER TCNT0, $00  ;TCNT0 = 0
+  SER TCNT2, $00  ;TCNT2 = 0
+  SER TCCR2, $00  ;TCCR2 = 0 timer0 counter
+  SER OCR0,  $C0  ;OCR0  = 192 192 = 0xC0 timer2 counter
+  SER TCCR0, $79  ;TCCR0 = 01111001
+  SER TIMSK, $01  ;TIMSK = 00000001
+  SER TIFR,  $00  ;TIFR  = 0
 }
 else { ;2 phase
-  TCNT0 = 0;
-  TCNT2 = 0;
-  TCCR2 = 0;
-  OCR0 = 230.4; 230 = 0xD6;
-  TCCR0 = 01111001;
-  TIMSK = 00000001;
-  TIFR = 0;
+  SER TCNT0, $00  ;TCNT0 = 0
+  SER TCNT2, $00  ;TCNT2 = 0
+  SER TCCR2, $00  ;TCCR2 = 0 timer0 counter
+  SER OCR0,  $D6  ;OCR0  = 230.4 230 = 0xD6
+  SER TCCR0, $79  ;TCCR0 = 01111001
+  SER TIMSK, $01  ;TIMSK = 00000001
+  SER TIFR,  $00  ;TIFR  = 0
 }
 RETI;
 
 INT1: ;Uout = Uin/10
 INT1BIT++;
 if (INT1BIT) { ;1 phase
-  TCNT0 = 0;
-  TCNT2 = 129; 129 = 0x81
-  OCR0 = 224; 224 = 0xD
-  OCR2 = 224; 224 = 0xD
-  TCCR0 = 01111001;
-  TCCR2 = 01111001;
-  TIMSK = 00000001;
-  TIFR = 0;
+  SER TCNT0, $00  ;TCNT0 = 0
+  SER TCNT2, $81  ;TCNT2 = 129 129 = 0x81
+  SER OCR0,  $D   ;OCR0  = 224 224 = 0xD
+  SER OCR2,  $D   ;OCR2  = 224 224 = 0xD
+  SER TCCR0, $79  ;TCCR0 = 01111001
+  SER TCCR2, $79  ;TCCR2 = 01111001
+  SER TIMSK, $01  ;TIMSK = 00000001
+  SER TIFR,  $00  ;TIFR  = 0
 }
 else { ;2 phase
-  TCNT0 = 0;
-  TCNT2 = 129; 129 = 0x81
-  OCR0 = 243; 243 = 0xE3
-  OCR2 = 243; 243 = 0xE3
-  TCCR0 = 01111001;
-  TCCR2 = 01111001;
-  TIMSK = 00000001;
-  TIFR = 0;
+  SER TCNT0, $00  ;TCNT0 = 0
+  SER TCNT2, $81  ;TCNT2 = 129 129 = 0x81
+  SER OCR0,  $E3  ;OCR0  = 243 243 = 0xE3
+  SER OCR2,  $E3  ;OCR2  = 243 243 = 0xE3
+  SER TCCR0, $79  ;TCCR0 = 01111001
+  SER TCCR2, $79  ;TCCR2 = 01111001
+  SER TIMSK, $01  ;TIMSK = 00000001
+  SER TIFR,  $00  ;TIFR  = 0
 }
 RETI
 
