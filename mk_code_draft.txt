@@ -1,12 +1,20 @@
-main:
+.EQU ADCSRA =$06
+.EQU OCR2   =$23
+.EQU TCNT2  =$24
+.EQU TCCR2  =$25
+.EQU TCNT0  =$32
+.EQU TCCR0  =$33
+.EQU TIFR   =$38
+.EQU TIMSK  =$39
+.EQU OCR0   =$3C
 .CSEG
 rjmp RESET
 main:
 rjmp main; infinite loop
 
-INT0: #Uout = Uin/4
+INT0: ;Uout = Uin/4
 INT0BIT++;
-if (INT0BIT) {
+if (INT0BIT) { ;1 phase
   TCNT0 = 0; 
   TCNT2 = 0;
   TCCR2 = 0; timer0 counter
@@ -15,7 +23,7 @@ if (INT0BIT) {
   TIMSK = 00000001;
   TIFR = 0;
 }
-else {
+else { ;2 phase
   TCNT0 = 0;
   TCNT2 = 0;
   TCCR2 = 0;
@@ -26,9 +34,9 @@ else {
 }
 RETI;
 
-INT1: #Uout = Uin/4  - 2phases
+INT1: ;Uout = Uin/10
 INT1BIT++;
-if (INT1BIT) {
+if (INT1BIT) { ;1 phase
   TCNT0 = 0;
   TCNT2 = 129; 129 = 0x81
   OCR0 = 224; 224 = 0xD
@@ -38,22 +46,31 @@ if (INT1BIT) {
   TIMSK = 00000001;
   TIFR = 0;
 }
-else {
-TCNT0 = 0;
-TCNT2 = 129; 129 = 0x81
-OCR0 = 243; 243 = 0xE3
-OCR2 = 243; 243 = 0xE3
-TCCR0 = 01111001;
-TCCR2 = 01111001;
-TIMSK = 00000001;
-TIFR = 0;
+else { ;2 phase
+  TCNT0 = 0;
+  TCNT2 = 129; 129 = 0x81
+  OCR0 = 243; 243 = 0xE3
+  OCR2 = 243; 243 = 0xE3
+  TCCR0 = 01111001;
+  TCCR2 = 01111001;
+  TIMSK = 00000001;
+  TIFR = 0;
 }
 RETI
 
-INT2: #ADC ON
-ADCBIT++;
-if (ADCBIT)
-  ADCSTA = 11101111;
-else
-  ADCSTA = 0;
-RETI;
+INT2: ;ADC ON
+EOR r31, r30; ADCBIT++
+SBRS r31, 0
+SER ADCSRA, $EF
+SBRC r31, 0
+SER ADCSRA, 0
+    ;if (ADCBIT)
+    ;  ADCSRA = 11101111;
+    ;else
+    ;  ADCSRA = 0;
+RETI
+
+RESET:
+SER r30, $01
+sei
+rjmp main
