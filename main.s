@@ -2,70 +2,70 @@
 .EQU PORTC = $15
 .EQU DDRC  = $14
 .EQU PINC  = $13
-.EQU SREG  = $3f
-.EQU ADCSRA =$06
-.EQU OCR2   =$23
-.EQU TCNT2  =$24
-.EQU TCCR2  =$25
-.EQU TCNT0  =$32
-.EQU TCCR0  =$33
-.EQU TIFR   =$38
-.EQU TIMSK  =$39
-.EQU OCR0   =$3C  
+.EQU SREG  = $3f    ;Status Register
+.EQU ADCSRA =$06    ;ADC    Control Register
+.EQU OCR2   =$23    ;Timer2 Output Compare Register
+.EQU TCNT2  =$24    ;Timer2 Counter
+.EQU TCCR2  =$25    ;Timer2 Control Register
+.EQU TCNT0  =$32    ;Timer0 Counter
+.EQU TCCR0  =$33    ;Timer0 Control Register
+.EQU TIFR   =$38    ;Timer  Interrupt Flag Register
+.EQU TIMSK  =$39    ;Timer  Interrupt Mask Register
+.EQU OCR0   =$3C    ;Timer0 Output Compare Register
 .CSEG
 rjmp RESET
 
 main:
   IN r16, ADCSRA
   SBRC r16, 7
-  rjmp CODE4
-  rjmp main; infinite loop
+  rjmp CODE4        ;if ADC ON then write symbols to LCD
+  rjmp main         ;infinite loop
 
-INT0: ;Uout = Uin/4
-  EOR r28, r30 ;INT0BIT++;
+INT0:               ;Uout = Uin/4
+  EOR r28, r30      ;r28[0]++ (INT0BIT++)
   SBRC r28, 0
-  rjmp phase42
-  1phase4:
+  rjmp phase42      ;if r28[0] (INT0BIT) == 1 then phase102
+  1phase4:          ;Uout = Uin/4 by 1 phase
     CLR r16
-    OUT TCNT0, r16
-    OUT TCNT2, r16
-    OUT TCCR2, r16
-    OUT TIFR,  r16
-    LDI r16,   $C0   ;OCR0  = 192 192 = 0xC0 timer2 counter
-    OUT OCR0,  r16
-    LDI r16,   $79   ;TCCR0 = 01111001
-    OUT TCCR0, r16
-    LDI r16,   $01   ;TIMSK = 00000001
-    OUT TIMSK, r16
+    OUT TCNT0, r16  ;TCNT0 = 0
+    OUT TCNT2, r16  ;TCNT2 = 0
+    OUT TCCR2, r16  ;TCCR2 = 0
+    OUT TIFR,  r16  ;TIFR = 0
+    LDI r16,   $C0
+    OUT OCR0,  r16  ;OCR0  = 192
+    LDI r16,   $79
+    OUT TCCR0, r16  ;TCCR0 = 01111001
+    LDI r16,   $01
+    OUT TIMSK, r16  ;TIMSK = 00000001
     RETI
 
-  phase42:
+  phase42:          ;Uout = Uin/4 by 2 phases
     CLR r16
-    OUT TCNT0, r16
-    OUT TCNT2, r16
-    OUT TCCR2, r16
-    OUT TIFR,  r16
-    LDI r16,   $D6  ;OCR0  = 230.4 230 = 0xD6
-    OUT OCR0,  r16
-    LDI r16,   $79  ;TCCR0 = 01111001
-    OUT TCCR0, r16
-    LDI r16,   $01  ;TIMSK = 00000001
-    OUT TIMSK, r16
+    OUT TCNT0, r16  ;TCNT0 = 0
+    OUT TCNT2, r16  ;TCNT2 = 0
+    OUT TCCR2, r16  ;TCCR2 = 0
+    OUT TIFR,  r16  ;TIFR  = 0 
+    LDI r16,   $D6
+    OUT OCR0,  r16  ;OCR0  = 230.4~230
+    LDI r16,   $79 
+    OUT TCCR0, r16  ;TCCR0 = 01111001
+    LDI r16,   $01
+    OUT TIMSK, r16  ;TIMSK = 00000001
     RETI
 
-INT1: ;Uout = Uin/10
-  EOR r29, r30 ;INT1BIT++;
+INT1:               ;Uout = Uin/10
+  EOR r29, r30      ;r29[0]++ (INT1BIT++)
   SBRC r29, 0
-  rjmp phase102
-  1phase10:
+  rjmp phase102     ;if r29[0] (INT1BIT) == 1 then phase102
+  1phase10:         ;Uout = Uin/10 by 1 phase
     CLR r16
-    OUT TCNT0, r16
-    OUT TIFR,  r16
-    LDI r16,   $81  ;TCNT2 = 129 129 = 0x81
+    OUT TCNT0, r16  ;TCNT0 = 0
+    OUT TIFR,  r16  ;TIFR  = 0 
+    LDI r16,   $81  ;TCNT2 = 129
     OUT TCNT2, r16
-    LDI r16,   $D   ;OCR0  = 224 224 = 0xD
+    LDI r16,   $D   ;OCR0  = 224
     OUT OCR0,  r16
-    LDI r16,   $D   ;OCR2  = 224 224 = 0xD
+    LDI r16,   $D   ;OCR2  = 224
     OUT OCR2,  r16
     LDI r16,   $79
     OUT TCCR0, r16  ;TCCR0 = 01111001
@@ -74,51 +74,51 @@ INT1: ;Uout = Uin/10
     OUT TIMSK, r16
     RETI
 
-  phase102:
+  phase102:         ;Uout = Uin/10 by 2 phases
     CLR r16
-    OUT TCNT0, r16
-    OUT TIFR,  r16
-    LDI r16,   $81  ;TCNT2 = 129 129 = 0x81
-    OUT TCNT2, r16
-    LDI r16,   $E3  ;OCR0  = 243 243 = 0xE3
-    OUT OCR0,  r16
-    OUT OCR2,  r16  ;OCR2  = 243 243 = 0xE3
-    LDI r16,   $79  ;TCCR0 = 01111001
-    OUT TCCR0, r16
+    OUT TCNT0, r16  ;TCNT0 = 0
+    OUT TIFR,  r16  ;TIFR  = 0 
+    LDI r16,   $81
+    OUT TCNT2, r16  ;TCNT2 = 129
+    LDI r16,   $E3
+    OUT OCR0,  r16  ;OCR0  = 243
+    OUT OCR2,  r16  ;OCR2  = 243
+    LDI r16,   $79
+    OUT TCCR0, r16  ;TCCR0 = 01111001
     OUT TCCR2, r16  ;TCCR2 = 01111001
-    LDI r16,   $01  ;TIMSK = 00000001
-    OUT TIMSK, r16
+    LDI r16,   $01
+    OUT TIMSK, r16  ;TIMSK = 00000001
     RETI
 
-INT2: ;ADC ON
-  EOR  r31, r30; ADCBIT++
+INT2:               ;ADC ON/OFF
+  EOR  r31, r30     ;r31[0]++ (ADCBIT++)
   LDI  r16, $EF
-  SBRS r31, 0
-  OUT ADCSRA, r16
-  CLR  r16
   SBRC r31, 0
-  OUT ADCSRA, r16
+  OUT ADCSRA, r16   ;if r31[0] (ADCBIT) == 1 then ADCSRA = 0xEF -> ADC ON
+  CLR  r16
+  SBRS r31, 0
+  OUT ADCSRA, r16   ;if r31[0] (ADCBIT) == 0 then ADCSRA = 0x0  -> ADC OFF
   RETI
 
-CODE4:
-  inc  r27
+CODE4:              ;protocol of writing symbols to LCD
+  inc  r27          ;counter of written to LDC symbols
   mov  r16, r18
   andi r16, $f0
   ori  r16, 1
   out  PORTC, r16
-  sbi  PORTC, 2
-  cbi  PORTC, 2
+  sbi  PORTC, 2     ;write strobe to PORTC
+  cbi  PORTC, 2     ;write strobe to PORTC
   ;rcall del
   CPI  r27, $04
-  BREQ SHIFT
+  BREQ SHIFT        ;if there were 4 written symbols then shift pointer to start of LCD 
   ret
 
-SHIFT:
+SHIFT:              ;SHIFT LCD pointer to start
   LDI r16, $02
-  OUT PORTC, r18
-  SBI PORTC, 2
-  CBI PORTC, 2
-  clr r27
+  OUT PORTC, r18    ;write 0x02 to PORTC
+  SBI PORTC, 2      ;write strobe to PORTC
+  CBI PORTC, 2      ;write strobe to PORTC
+  clr r27           ;set written symbols counter to 0
   ret
 
 RESET:
@@ -130,4 +130,4 @@ RESET:
   
   
   
-  ;155 str CLI PORTC, 2 ???
+;155 str CLI PORTC, 2 ???
