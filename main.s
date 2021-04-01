@@ -1,22 +1,22 @@
 .DEVICE atmega8
-.EQU PORTC = $15
-.EQU DDRC  = $14
-.EQU PINC  = $13
-.EQU SREG  = $3f    ;Status Register
-.EQU ADCSRA =$06    ;ADC    Control Register
-.EQU OCR2   =$23    ;Timer2 Output Compare Register
-.EQU TCNT2  =$24    ;Timer2 Counter
-.EQU TCCR2  =$25    ;Timer2 Control Register
-.EQU TCNT0  =$32    ;Timer0 Counter
-.EQU TCCR0  =$33    ;Timer0 Control Register
-.EQU TIFR   =$38    ;Timer  Interrupt Flag Register
-.EQU TIMSK  =$39    ;Timer  Interrupt Mask Register
-.EQU OCR0   =$3C    ;Timer0 Output Compare Register
+.EQU PORTC  = $15
+.EQU DDRC   = $14
+.EQU PINC   = $13
+.EQU SREG   = $3f   ;Status Register
+.EQU ADCSRA = $06   ;ADC    Control Register
+.EQU OCR2   = $23   ;Timer2 Output Compare Register
+.EQU TCNT2  = $24   ;Timer2 Counter
+.EQU TCCR2  = $25   ;Timer2 Control Register
+.EQU TCNT0  = $32   ;Timer0 Counter
+.EQU TCCR0  = $33   ;Timer0 Control Register
+.EQU TIFR   = $38   ;Timer  Interrupt Flag Register
+.EQU TIMSK  = $39   ;Timer  Interrupt Mask Register
+.EQU OCR0   = $3C   ;Timer0 Output Compare Register
 .CSEG
 rjmp RESET
 
 main:
-  IN r16, ADCSRA
+  IN   r16, ADCSRA
   SBRC r16, 7
   rjmp CODE4        ;if ADC ON then write symbols to LCD
   rjmp main         ;infinite loop
@@ -35,8 +35,6 @@ INT0:               ;Uout = Uin/4
     OUT OCR0,  r16  ;OCR0  = 192
     LDI r16,   $79
     OUT TCCR0, r16  ;TCCR0 = 01111001
-    LDI r16,   $01
-    OUT TIMSK, r16  ;TIMSK = 00000001
     RETI
 
   phase42:          ;Uout = Uin/4 by 2 phases
@@ -49,8 +47,6 @@ INT0:               ;Uout = Uin/4
     OUT OCR0,  r16  ;OCR0  = 230.4~230
     LDI r16,   $79 
     OUT TCCR0, r16  ;TCCR0 = 01111001
-    LDI r16,   $01
-    OUT TIMSK, r16  ;TIMSK = 00000001
     RETI
 
 INT1:               ;Uout = Uin/10
@@ -70,8 +66,6 @@ INT1:               ;Uout = Uin/10
     LDI r16,   $79
     OUT TCCR0, r16  ;TCCR0 = 01111001
     OUT TCCR2, r16  ;TCCR2 = 01111001
-    LDI r16,   $01  ;TIMSK = 00000001
-    OUT TIMSK, r16
     RETI
 
   phase102:         ;Uout = Uin/10 by 2 phases
@@ -86,8 +80,6 @@ INT1:               ;Uout = Uin/10
     LDI r16,   $79
     OUT TCCR0, r16  ;TCCR0 = 01111001
     OUT TCCR2, r16  ;TCCR2 = 01111001
-    LDI r16,   $01
-    OUT TIMSK, r16  ;TIMSK = 00000001
     RETI
 
 INT2:               ;ADC ON/OFF
@@ -101,30 +93,31 @@ INT2:               ;ADC ON/OFF
   RETI
 
 CODE4:              ;protocol of writing symbols to LCD
-  inc  r27          ;counter of written to LDC symbols
-  mov  r16, r18
-  andi r16, $f0
-  ori  r16, 1
-  out  PORTC, r16
-  sbi  PORTC, 2     ;write strobe to PORTC
-  cbi  PORTC, 2     ;write strobe to PORTC
+  INC  r27          ;counter  of written to LDC symbols
+  MOV  r16, r18
+  ANDI r16, $f0
+  ORI  r16, 1
+  OUT  PORTC, r16
+  SBI  PORTC, 2     ;write strobe to PORTC
+  CBI  PORTC, 2     ;write strobe to PORTC
   ;rcall del
   CPI  r27, $04
   BREQ SHIFT        ;if there were 4 written symbols then shift pointer to start of LCD 
-  ret
+  RET
 
 SHIFT:              ;SHIFT LCD pointer to start
   LDI r16, $02
-  OUT PORTC, r18    ;write 0x02 to PORTC
+  OUT PORTC, r18    ;write 0x02   to PORTC
   SBI PORTC, 2      ;write strobe to PORTC
   CBI PORTC, 2      ;write strobe to PORTC
-  clr r27           ;set written symbols counter to 0
-  ret
+  CLR r27           ;set written symbols counter to 0
+  RET
 
 RESET:
   LDI r30, $01
   SER r16
-  OUT DDRC, r16
+  OUT DDRC, r16     ;DDRC = 0xFF
+  OUT TIMSK, r30    ;TIMSK = 00000001
   SEI
   rjmp main
   
