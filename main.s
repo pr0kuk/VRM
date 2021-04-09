@@ -1,7 +1,8 @@
-.DEVICE atmega8
+.DEVICE atmega32
 .EQU PORTC  = $15
 .EQU DDRC   = $14
 .EQU PINC   = $13
+.EQU PORTD  = $12
 .EQU SREG   = $3f   ;Status Register
 .EQU ADCSRA = $06   ;ADC    Control Register
 .EQU OCR2   = $23   ;Timer2 Output Compare Register
@@ -11,17 +12,39 @@
 .EQU TCCR0  = $33   ;Timer0 Control Register
 .EQU TIFR   = $38   ;Timer  Interrupt Flag Register
 .EQU TIMSK  = $39   ;Timer  Interrupt Mask Register
+.EQU GIFR   = $3A   ;
+.EQU GICR   = $3B   ;
 .EQU OCR0   = $3C   ;Timer0 Output Compare Register
 .CSEG
-rjmp RESET
-
+rjmp RESET ;0
+rjmp EXT_INT0 ;1
+rjmp EXT_INT1 ;2
+RETI ;3
+RETI ;4
+RETI ;5
+RETI ;6
+RETI ;7
+RETI ;8
+RETI ;9
+RETI ;A
+RETI ;B
+RETI ;C
+RETI ;D
+RETI ;E
+RETI ;F
+RETI ;10
+RETI ;11
+rjmp INT2 ;12
+RETI ;13
+RETI ;14
+rjmp main ;15
 main:
   IN   r16, ADCSRA
   SBRC r16, 7
   rjmp CODE4        ;if ADC ON then write symbols to LCD
   rjmp main         ;infinite loop
 
-INT0:               ;Uout = Uin/4
+EXT_INT0:           ;Uout = Uin/4
   EOR r28, r30      ;r28[0]++ (INT0BIT++)
   SBRC r28, 0
   rjmp phase42      ;if r28[0] (INT0BIT) == 1 then phase102
@@ -49,7 +72,7 @@ INT0:               ;Uout = Uin/4
     OUT TCCR0, r16  ;TCCR0 = 01111001
     RETI
 
-INT1:               ;Uout = Uin/10
+EXT_INT1:           ;Uout = Uin/10
   EOR r29, r30      ;r29[0]++ (INT1BIT++)
   SBRC r29, 0
   rjmp phase102     ;if r29[0] (INT1BIT) == 1 then phase102
@@ -116,8 +139,13 @@ SHIFT:              ;SHIFT LCD pointer to start
 RESET:
   LDI r30, $01
   SER r16
-  OUT DDRC, r16     ;DDRC = 0xFF
+  OUT DDRC, r16     ;DDRC  = 0xFF
   OUT TIMSK, r30    ;TIMSK = 00000001
+  LDI r16, $E0
+  OUT GICR, r16     ;GICR  = 11100000
+  OUT GIFR, r16     ;GIFR  = 11100000
+  CLR r16
+  SBI PORTD, 2
   SEI
   rjmp main
   
