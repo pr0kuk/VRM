@@ -1,28 +1,28 @@
-.DEVICE atmega32
-.EQU PORTC  = $15
-.EQU DDRC   = $14
-.EQU PINC   = $13
-.EQU PORTD  = $12
-.EQU SREG   = $3f   ;Status Register
-.EQU ADCSRA = $06   ;ADC    Control Register
-.EQU OCR2   = $23   ;Timer2 Output Compare Register
-.EQU TCNT2  = $24   ;Timer2 Counter
-.EQU TCCR2  = $25   ;Timer2 Control Register
-.EQU TCNT0  = $32   ;Timer0 Counter
-.EQU TCCR0  = $33   ;Timer0 Control Register
-.EQU TIFR   = $38   ;Timer  Interrupt Flag Register
-.EQU TIMSK  = $39   ;Timer  Interrupt Mask Register
-.EQU GIFR   = $3A   ;
-.EQU GICR   = $3B   ;
-.EQU OCR0   = $3C   ;Timer0 Output Compare Register
+;.DEVICE atmega8535
+;.EQU PORTC  = $15
+;.EQU DDRC   = $14
+;.EQU PINC   = $13
+;.EQU PORTD  = $12
+;.EQU SREG   = $3f   ;Status Register
+;.EQU ADCSRA = $06   ;ADC    Control Register
+;.EQU OCR2   = $23   ;Timer2 Output Compare Register
+;.EQU TCNT2  = $24   ;Timer2 Counter
+;.EQU TCCR2  = $25   ;Timer2 Control Register
+;.EQU TCNT0  = $32   ;Timer0 Counter
+;.EQU TCCR0  = $33   ;Timer0 Control Register
+;.EQU TIFR   = $38   ;Timer  Interrupt Flag Register
+;.EQU TIMSK  = $39   ;Timer  Interrupt Mask Register
+;.EQU GIFR   = $3A   ;
+;.EQU GICR   = $3B   ;
+;.EQU OCR0   = $3C   ;Timer0 Output Compare Register
 .CSEG
 rjmp RESET ;0
-rjmp EXT_INT0 ;1
-rjmp EXT_INT1 ;2
-RETI ;3
-RETI ;4
+reti ;1
+rjmp EXT_INT0 ;2
+reti ;3
+rjmp EXT_INT1 ;4
 RETI ;5
-RETI ;6
+rjmp EXT_INT2 ;6
 RETI ;7
 RETI ;8
 RETI ;9
@@ -34,7 +34,7 @@ RETI ;E
 RETI ;F
 RETI ;10
 RETI ;11
-rjmp INT2 ;12
+RETI ;12
 RETI ;13
 RETI ;14
 rjmp main ;15
@@ -48,7 +48,7 @@ EXT_INT0:           ;Uout = Uin/4
   EOR r28, r30      ;r28[0]++ (INT0BIT++)
   SBRC r28, 0
   rjmp phase42      ;if r28[0] (INT0BIT) == 1 then phase102
-  1phase4:          ;Uout = Uin/4 by 1 phase
+  phase4:          ;Uout = Uin/4 by 1 phase
     CLR r16
     OUT TCNT0, r16  ;TCNT0 = 0
     OUT TCNT2, r16  ;TCNT2 = 0
@@ -76,7 +76,7 @@ EXT_INT1:           ;Uout = Uin/10
   EOR r29, r30      ;r29[0]++ (INT1BIT++)
   SBRC r29, 0
   rjmp phase102     ;if r29[0] (INT1BIT) == 1 then phase102
-  1phase10:         ;Uout = Uin/10 by 1 phase
+  phase10:         ;Uout = Uin/10 by 1 phase
     CLR r16
     OUT TCNT0, r16  ;TCNT0 = 0
     OUT TIFR,  r16  ;TIFR  = 0 
@@ -105,7 +105,7 @@ EXT_INT1:           ;Uout = Uin/10
     OUT TCCR2, r16  ;TCCR2 = 01111001
     RETI
 
-INT2:               ;ADC ON/OFF
+EXT_INT2:               ;ADC ON/OFF
   EOR  r31, r30     ;r31[0]++ (ADCBIT++)
   LDI  r16, $EF
   SBRC r31, 0
@@ -141,14 +141,11 @@ RESET:
   SER r16
   OUT DDRC, r16     ;DDRC  = 0xFF
   OUT TIMSK, r30    ;TIMSK = 00000001
+  LDI r16, $0F
+  OUT MCUCR, r16    ;MCUCE = 00001111
   LDI r16, $E0
   OUT GICR, r16     ;GICR  = 11100000
-  OUT GIFR, r16     ;GIFR  = 11100000
   CLR r16
   SBI PORTD, 2
   SEI
   rjmp main
-  
-  
-  
-;155 str CLI PORTC, 2 ???
