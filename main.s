@@ -46,9 +46,9 @@ main:
 
 EXT_INT0:           ;Uout = Uin/4
   EOR r28, r30      ;r28[0]++ (INT0BIT++)
-  SBRC r28, 0
+  SBRS r28, 0
   rjmp phase42      ;if r28[0] (INT0BIT) == 1 then phase102
-  phase4:          ;Uout = Uin/4 by 1 phase
+  phase4:           ;Uout = Uin/4 by 1 phase
     CLR r16
     OUT TCNT0, r16  ;TCNT0 = 0
     OUT TCNT2, r16  ;TCNT2 = 0
@@ -58,54 +58,61 @@ EXT_INT0:           ;Uout = Uin/4
     OUT OCR0,  r16  ;OCR0  = 192
     LDI r16,   $79
     OUT TCCR0, r16  ;TCCR0 = 01111001
+	SEI
     RETI
 
   phase42:          ;Uout = Uin/4 by 2 phases
     CLR r16
+	OUT TCCR0, r16
+	OUT TCCR2, r16
     OUT TCNT0, r16  ;TCNT0 = 0
-    OUT TCNT2, r16  ;TCNT2 = 0
-    OUT TCCR2, r16  ;TCCR2 = 0
     OUT TIFR,  r16  ;TIFR  = 0 
-    LDI r16,   $D6
-    OUT OCR0,  r16  ;OCR0  = 230.4~230
-    LDI r16,   $79 
+	LDI r16,   $80
+    OUT TCNT2, r16  ;TCNT2 = $FF/2
+    LDI r16,   $E0
+    OUT OCR0,  r16  ;OCR0  = 224
+	OUT OCR2,  r16
+    LDI r16,   $79
+	OUT TCCR2, r16
     OUT TCCR0, r16  ;TCCR0 = 01111001
+	SEI
     RETI
 
 EXT_INT1:           ;Uout = Uin/10
   EOR r29, r30      ;r29[0]++ (INT1BIT++)
-  SBRC r29, 0
+  SBRS r29, 0
   rjmp phase102     ;if r29[0] (INT1BIT) == 1 then phase102
-  phase10:         ;Uout = Uin/10 by 1 phase
+  phase10:          ;Uout = Uin/10 by 1 phase
     CLR r16
+	OUT TCCR0, r16
+	OUT TCCR2, r16
     OUT TCNT0, r16  ;TCNT0 = 0
     OUT TIFR,  r16  ;TIFR  = 0 
-    LDI r16,   $81  ;TCNT2 = 129
-    OUT TCNT2, r16
-    LDI r16,   $D   ;OCR0  = 224
+    LDI r16,   $E6  ;OCR0  = 230
     OUT OCR0,  r16
-    LDI r16,   $D   ;OCR2  = 224
-    OUT OCR2,  r16
     LDI r16,   $79
     OUT TCCR0, r16  ;TCCR0 = 01111001
-    OUT TCCR2, r16  ;TCCR2 = 01111001
+	SEI
     RETI
 
   phase102:         ;Uout = Uin/10 by 2 phases
     CLR r16
+	OUT TCCR0, r16
+	OUT TCCR2, r16
     OUT TCNT0, r16  ;TCNT0 = 0
     OUT TIFR,  r16  ;TIFR  = 0 
-    LDI r16,   $81
-    OUT TCNT2, r16  ;TCNT2 = 129
-    LDI r16,   $E3
+    LDI r16,   $80
+    OUT TCNT2, r16  ;TCNT2 = 0xFF/2
+    LDI r16,   $F3
     OUT OCR0,  r16  ;OCR0  = 243
     OUT OCR2,  r16  ;OCR2  = 243
     LDI r16,   $79
     OUT TCCR0, r16  ;TCCR0 = 01111001
     OUT TCCR2, r16  ;TCCR2 = 01111001
+	SEI
     RETI
 
-EXT_INT2:               ;ADC ON/OFF
+EXT_INT2:           ;ADC ON/OFF
   EOR  r31, r30     ;r31[0]++ (ADCBIT++)
   LDI  r16, $EF
   SBRC r31, 0
@@ -126,7 +133,7 @@ CODE4:              ;protocol of writing symbols to LCD
   ;rcall del
   CPI  r27, $04
   BREQ SHIFT        ;if there were 4 written symbols then shift pointer to start of LCD 
-  RET
+  RETI
 
 SHIFT:              ;SHIFT LCD pointer to start
   LDI r16, $02
@@ -140,12 +147,13 @@ RESET:
   LDI r30, $01
   SER r16
   OUT DDRC, r16     ;DDRC  = 0xFF
+  SBI DDRB, 3
+  SBI DDRD, 7
   OUT TIMSK, r30    ;TIMSK = 00000001
   LDI r16, $0F
   OUT MCUCR, r16    ;MCUCE = 00001111
   LDI r16, $E0
   OUT GICR, r16     ;GICR  = 11100000
   CLR r16
-  SBI PORTD, 2
   SEI
   rjmp main
