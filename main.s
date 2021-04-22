@@ -22,7 +22,7 @@ rjmp EXT_INT0 ;2
 reti ;3
 rjmp EXT_INT1 ;4
 RETI ;5
-rjmp EXT_INT2 ;6
+RETI ;6
 RETI ;7
 RETI ;8
 RETI ;9
@@ -39,9 +39,6 @@ RETI ;13
 RETI ;14
 rjmp main ;15
 main:
-  IN   r16, ADCSRA
-  SBRC r16, 7
-  rjmp CODE4        ;if ADC ON then write symbols to LCD
   rjmp main         ;infinite loop
 
 EXT_INT0:           ;Uout = Uin/4
@@ -112,48 +109,24 @@ EXT_INT1:           ;Uout = Uin/10
 	SEI
     RETI
 
-EXT_INT2:           ;ADC ON/OFF
-  EOR  r31, r30     ;r31[0]++ (ADCBIT++)
-  LDI  r16, $EF
-  SBRC r31, 0
-  OUT ADCSRA, r16   ;if r31[0] (ADCBIT) == 1 then ADCSRA = 0xEF -> ADC ON
-  CLR  r16
-  SBRS r31, 0
-  OUT ADCSRA, r16   ;if r31[0] (ADCBIT) == 0 then ADCSRA = 0x0  -> ADC OFF
-  RETI
-
-CODE4:              ;protocol of writing symbols to LCD
-  INC  r27          ;counter  of written to LDC symbols
-  MOV  r16, r18
-  ANDI r16, $f0
-  ORI  r16, 1
-  OUT  PORTC, r16
-  SBI  PORTC, 2     ;write strobe to PORTC
-  CBI  PORTC, 2     ;write strobe to PORTC
-  ;rcall del
-  CPI  r27, $04
-  BREQ SHIFT        ;if there were 4 written symbols then shift pointer to start of LCD 
-  RETI
-
-SHIFT:              ;SHIFT LCD pointer to start
-  LDI r16, $02
-  OUT PORTC, r18    ;write 0x02   to PORTC
-  SBI PORTC, 2      ;write strobe to PORTC
-  CBI PORTC, 2      ;write strobe to PORTC
-  CLR r27           ;set written symbols counter to 0
-  RET
-
 RESET:
   LDI r30, $01
   SER r16
   OUT DDRC, r16     ;DDRC  = 0xFF
   SBI DDRB, 3
   SBI DDRD, 7
+  SBI PORTD, 3
+  SBI PORTD, 2
+  SBI PIND, 3
+  SBI PIND, 2
   OUT TIMSK, r30    ;TIMSK = 00000001
   LDI r16, $0F
-  OUT MCUCR, r16    ;MCUCE = 00001111
   LDI r16, $E0
   OUT GICR, r16     ;GICR  = 11100000
+  LDI r16, LOW(ramend)
+  OUT SPL, r16
+  LDI r16, HIGH(ramend)
+  OUT SPH, r16
   CLR r16
   SEI
   rjmp main
