@@ -1,28 +1,30 @@
-.DEVICE atmega32
-.EQU PORTC  = $15
-.EQU DDRC   = $14
-.EQU PINC   = $13
-.EQU PORTD  = $12
-.EQU SREG   = $3f   ;Status Register
-.EQU ADCSRA = $06   ;ADC    Control Register
-.EQU OCR2   = $23   ;Timer2 Output Compare Register
-.EQU TCNT2  = $24   ;Timer2 Counter
-.EQU TCCR2  = $25   ;Timer2 Control Register
-.EQU TCNT0  = $32   ;Timer0 Counter
-.EQU TCCR0  = $33   ;Timer0 Control Register
-.EQU TIFR   = $38   ;Timer  Interrupt Flag Register
-.EQU TIMSK  = $39   ;Timer  Interrupt Mask Register
-.EQU GIFR   = $3A   ;
-.EQU GICR   = $3B   ;
-.EQU OCR0   = $3C   ;Timer0 Output Compare Register
-.EQU DDRB   = $17
-.EQU DDRD   = $11
-.EQU MCUCR  = $35
-.EQU SPL   = $3D
-.EQU SPH  = $3E
+;.DEVICE atmega32
+;.EQU PORTC  = $15
+;.EQU DDRC   = $14
+;.EQU PINC   = $13
+;.EQU PORTD  = $12
+;.EQU SREG   = $3f   ;Status Register
+;.EQU ADCSRA = $06   ;ADC    Control Register
+;.EQU OCR2   = $23   ;Timer2 Output Compare Register
+;.EQU TCNT2  = $24   ;Timer2 Counter
+;.EQU TCCR2  = $25   ;Timer2 Control Register
+;.EQU TCNT0  = $32   ;Timer0 Counter
+;.EQU TCCR0  = $33   ;Timer0 Control Register
+;.EQU TIFR   = $38   ;Timer  Interrupt Flag Register
+;.EQU TIMSK  = $39   ;Timer  Interrupt Mask Register
+;.EQU GIFR   = $3A   ;
+;.EQU GICR   = $3B   ;
+;.EQU OCR0   = $3C   ;Timer0 Output Compare Register
+;.EQU DDRB   = $17
+;.EQU DDRD   = $11
+;.EQU MCUCR  = $35
+;.EQU SPL   = $3D
+;.EQU SPH  = $3E
 .CSEG
 rjmp RESET ;0
+RETI;
 rjmp EXT_INT0 ;2
+RETI;
 rjmp EXT_INT1 ;4
 RETI ;5
 RETI ;6
@@ -126,9 +128,9 @@ RESET:
   ;OUT MCUCR, r16    ;MCUCE = 00001111
   LDI r16, $E0
   OUT GICR, r16     ;GICR  = 11100000
-  LDI r16, low(RAMEND)
+  LDI r16, $5f
   OUT SPL, r16
-  LDI r16, high(RAMEND)
+  LDI r16, $08
   OUT SPH, r16
   CLR r16
   SEI
